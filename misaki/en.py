@@ -141,11 +141,8 @@ class Lexicon:
         self.british = british
         self.cap_stresses = (0.5, 2)
         self.golds = {}
-        self.silvers = {}
         with importlib.resources.open_text(data, f"{'gb' if british else 'us'}_gold.json") as r:
             self.golds = Lexicon.grow_dictionary(json.load(r))
-        with importlib.resources.open_text(data, f"{'gb' if british else 'us'}_silver.json") as r:
-            self.silvers = Lexicon.grow_dictionary(json.load(r))
         assert all(isinstance(v, str) or isinstance(v, dict) for v in self.golds.values())
         vocab = GB_VOCAB if british else US_VOCAB
         for vs in self.golds.values():
@@ -217,7 +214,7 @@ class Lexicon:
         return tag
 
     def is_known(self, word, tag):
-        if word in self.golds or word in SYMBOLS or word in self.silvers:
+        if word in self.golds or word in SYMBOLS:
             return True
         elif not word.isalpha() or not all(ord(c) in LEXICON_ORDS for c in word):
             return False # TODO: café
@@ -233,8 +230,6 @@ class Lexicon:
             word = word.lower()
             is_NNP = tag == 'NNP' #Lexicon.get_parent_tag(tag) == 'NOUN'
         ps, rating = self.golds.get(word), 4
-        if ps is None and not is_NNP:
-            ps, rating = self.silvers.get(word), 3
         if isinstance(ps, dict):
             if ctx and ctx.future_vowel is None and 'None' in ps:
                 tag = 'None'
@@ -335,10 +330,10 @@ class Lexicon:
         wl = word.lower()
         if len(word) > 1 and word.replace("'", '').isalpha() and word != word.lower() and (
             tag != 'NNP' or len(word) > 7
-        ) and word not in self.golds and word not in self.silvers and (
+        ) and word not in self.golds and (
             word == word.upper() or word[1:] == word[1:].lower()
         ) and (
-            wl in self.golds or wl in self.silvers or any(
+            wl in self.golds or any(
                 fn(wl, tag, stress, ctx)[0] for fn in (self.stem_s, self.stem_ed, self.stem_ing)
             )
         ):
