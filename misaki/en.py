@@ -491,7 +491,7 @@ class Lexicon:
 
 class FallbackNetwork:
     def __init__(self, british):
-        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cpu")
         self.model = BartForConditionalGeneration.from_pretrained(
             "../graphemes_to_phonemes/en-GB_model_training" if british else "../graphemes_to_phonemes/en-US_model_training",
             local_files_only=True,
