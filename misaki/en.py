@@ -493,7 +493,10 @@ class FallbackNetwork:
     def __init__(self, british):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model = BartForConditionalGeneration.from_pretrained(
-            "PeterReid/graphemes_to_phonemes_en_" + ("gb" if british else "us"))
+            "../graphemes_to_phonemes/en-GB_model_training" if british else "../graphemes_to_phonemes/en-US_model_training",
+            local_files_only=True,
+        )
+            # "PeterReid/graphemes_to_phonemes_en_" + ("gb" if british else "us"))
         self.model.to(self.device)
         self.model.eval()
         self.grapheme_to_token = {g: i for i, g in enumerate(self.model.config.grapheme_chars)}
